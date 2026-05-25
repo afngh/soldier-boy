@@ -26,15 +26,16 @@ Because it runs locally, **soldier-boy** can read files in your workspace, analy
 
 ### 💬 Multi-Mode Interactive Loop
 Toggle between conversational thinking and active codebase building:
-- **`[think] Mode`** (Default): Conceptual explanations, planning, and architectural reviews. (Tools are disabled for safety).
+- **`[think] Mode`**: Conceptual explanations, planning, and architectural reviews. (Tools are disabled for safety).
 - **`[build] Mode`**: Autonomous filesystem modifications. The agent will read, write, and execute files locally.
 
 ### 🔌 Interactive Slash Commands
 Control the agent's behavior directly inside the chat interface:
 *   `/think` — Switches the active session mode to Think.
 *   `/build` — Switches the active session mode to Build.
-*   `/think <prompt>` — Sends a conversational message in Think Mode.
-*   `/build <prompt>` — Starts an autonomous local file operation in Build Mode.
+*   `/cd <path>` — Change active workspace directory dynamically.
+*   `/pwd` — View the active workspace directory.
+*   `exit` — Close the chat loop.
 
 ---
 
@@ -57,7 +58,7 @@ npm install
 ```
 
 ### 3. Run the Automated Installer
-Execute the premium system installer to globally link the binaries and save your cloud environment variables:
+Execute the system installer to globally link the binaries and save your cloud environment variables:
 ```bash
 ./install.sh
 ```
@@ -76,22 +77,6 @@ source ~/.bashrc
 Open **any folder** on your computer system and type the global activation command:
 ```bash
 soldier chat
-```
-
-### Example Multi-Mode Execution:
-```text
-soldier [think] > hello, i am afnan
-🤖 Assistant (Thinking Mode): Hello Afnan, it's nice to meet you!
-
-soldier [think] > /build create a file hello.py defining functions and run it
-🤖 Assistant (Build Mode): To create the file, I will use the write_file tool...
-⚙️  [Tool Call]: Intercepted local action "write_file"...
-✅ [Tool Success]: Written to "hello.py".
-⚙️  [Local Terminal]: Running command: "python3 hello.py"
-✅ [Tool Success]: Execution completed.
-
-soldier [build] > /think what did we do in our last step and what is my name?
-🤖 Assistant (Thinking Mode): Your name is Afnan. In our last step, we created and executed a Python script...
 ```
 
 ---
