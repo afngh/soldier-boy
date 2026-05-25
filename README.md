@@ -87,7 +87,7 @@ soldier chat
 import { SoldierBoyAI } from '@soldier-boy/sdk';
 
 const ai = new SoldierBoyAI({
-  apiKey: 'bn_live_4f3c8a9e2d6b1a0f7e5d3c2b1a0f9e8d',
+  apiKey: 'BlackNoir_ApiKey',
   baseUrl: 'https://black-noir-production.up.railway.app'
 });
 
