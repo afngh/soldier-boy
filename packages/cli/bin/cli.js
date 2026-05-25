@@ -22,8 +22,10 @@ program
   .description('Vought AI\'s Soldier Boy - Autonomous Local Coding Agent')
   .version('1.0.0');
 
-// System prompt for BUILD MODE (Enables tools)
-const BUILD_SYSTEM_PROMPT = `You are Vought AI's "soldier-boy" running in [BUILD MODE]. Your primary mission is to perform active filesystem modifications, read source files, and execute terminal commands locally in: "${process.cwd()}".
+// Generates the system prompt based on current active workspace folder and mode
+function getSystemPrompt(mode) {
+  if (mode === 'build') {
+    return `You are Vought AI's "soldier-boy" running in [BUILD MODE]. Your primary mission is to perform active filesystem modifications, read source files, and execute terminal commands locally in the user's active workspace: "${process.cwd()}".
 
 ### Available Tools:
 1. **write_file**: Create or overwrite a local file with complete source code content.
@@ -43,14 +45,15 @@ const BUILD_SYSTEM_PROMPT = `You are Vought AI's "soldier-boy" running in [BUILD
 - I will execute the tool locally on your behalf and feed the output results back to you.
 - Once you receive the tool results, continue your analysis, correct errors, and proceed to the next step or output another tool call if required.
 - Provide clean, professional code. Explain what you are doing before executing any tool call.`;
+  }
 
-// System prompt for THINK MODE (Disables tools, focus on pure chatting/planning)
-const THINK_SYSTEM_PROMPT = `You are Vought AI's "soldier-boy" running in [THINK MODE]. Your primary mission is to answer questions, analyze architectures, chat, and help the user plan without modifying the filesystem.
+  return `You are Vought AI's "soldier-boy" running in [THINK MODE]. Your primary mission is to answer questions, analyze architectures, chat, and help the user plan without modifying the filesystem.
 
 ### Strict Guidelines:
 - DO NOT use or output any tool calls (no {{call:...}} formatting).
 - Focus purely on conceptual explanations, code architectures, plans, and chat responses.
 - Be concise, professional, and helpful.`;
+}
 
 // Iconic ASCII Art Logo of Soldier Boy (Vought / The Boys style)
 const LOGO = `
@@ -69,7 +72,7 @@ async function runAutonomousAgentLoop(messages, mode) {
   let hasToolCall = false;
   let toolOutput = null;
 
-  console.log(`\n🤖 Assistant (${mode === 'build' ? 'Build' : 'Think'}):`);
+  console.log(`\nAssistant (${mode === 'build' ? 'Build' : 'Think'}):`);
   let responseText = '';
 
   try {
@@ -83,7 +86,7 @@ async function runAutonomousAgentLoop(messages, mode) {
     );
     console.log(); // Newline
   } catch (err) {
-    console.error(`\n❌ API Error: ${err.message}`);
+    console.error(`\n[API Error]: ${err.message}`);
     return;
   }
 
@@ -100,74 +103,74 @@ async function runAutonomousAgentLoop(messages, mode) {
       try {
         params = JSON.parse(paramsStr);
       } catch (parseErr) {
-        console.log(`\n⚠️  [Agent Error]: Failed to parse JSON parameters. Make sure to double quote JSON keys.`);
+        console.log(`\n[Agent Error]: Failed to parse JSON parameters. Make sure to double quote JSON keys.`);
         toolOutput = `Error: Failed to parse parameters as valid JSON. Retrying tool call using strict double-quoted JSON formats.`;
         hasToolCall = true;
       }
 
       if (!hasToolCall) {
-        console.log(`\n⚙️  [Tool Call]: "${toolName}"...`);
+        console.log(`\n[Tool Call]: "${toolName}"...`);
 
         try {
           if (toolName === 'write_file') {
             if (!params.path || params.content === undefined) {
               toolOutput = `Error: Missing 'path' or 'content' in write_file parameters.`;
-              console.log(`❌ [Tool Error]: Missing params.`);
+              console.log(`[Tool Error]: Missing params.`);
             } else {
               const target = path.resolve(process.cwd(), params.path);
               fs.mkdirSync(path.dirname(target), { recursive: true });
               fs.writeFileSync(target, params.content, 'utf-8');
               toolOutput = `Success: File written successfully to ${params.path} (${params.content.length} bytes).`;
-              console.log(`✅ [Tool Success]: Written to "${params.path}".`);
+              console.log(`[Tool Success]: Written to "${params.path}".`);
             }
           } else if (toolName === 'read_file') {
             if (!params.path) {
               toolOutput = `Error: Missing 'path' in read_file parameters.`;
-              console.log(`❌ [Tool Error]: Missing params.`);
+              console.log(`[Tool Error]: Missing params.`);
             } else {
               const target = path.resolve(process.cwd(), params.path);
               if (!fs.existsSync(target)) {
                 toolOutput = `Error: File not found at path "${params.path}".`;
-                console.log(`❌ [Tool Error]: File not found.`);
+                console.log(`[Tool Error]: File not found.`);
               } else {
                 const content = fs.readFileSync(target, 'utf-8');
                 toolOutput = `Success: File content of "${params.path}":\n---\n${content}\n---`;
-                console.log(`✅ [Tool Success]: File content loaded.`);
+                console.log(`[Tool Success]: File content loaded.`);
               }
             }
           } else if (toolName === 'list_dir') {
             const target = path.resolve(process.cwd(), params.path || '.');
             if (!fs.existsSync(target)) {
               toolOutput = `Error: Directory not found at path "${params.path || '.'}".`;
-              console.log(`❌ [Tool Error]: Directory not found.`);
+              console.log(`[Tool Error]: Directory not found.`);
             } else {
               const files = fs.readdirSync(target);
               toolOutput = `Success: Directory listing of "${params.path || '.'}":\n${files.join('\n')}`;
-              console.log(`✅ [Tool Success]: Directory listing completed.`);
+              console.log(`[Tool Success]: Directory listing completed.`);
             }
           } else if (toolName === 'execute_command') {
             if (!params.command) {
               toolOutput = `Error: Missing 'command' in execute_command parameters.`;
-              console.log(`❌ [Tool Error]: Missing command parameter.`);
+              console.log(`[Tool Error]: Missing command parameter.`);
             } else {
-              console.log(`\n⚙️  [Local Terminal]: Running command: "${params.command}"`);
+              console.log(`\n[Local Terminal]: Running command: "${params.command}"`);
               
               try {
                 const output = execSync(params.command, { encoding: 'utf-8', timeout: 60000 });
                 toolOutput = `Success: Command executed successfully.\n[Stdout/Stderr]:\n${output}`;
-                console.log(`✅ [Tool Success]: Execution completed.`);
+                console.log(`[Tool Success]: Execution completed.`);
               } catch (error) {
                 toolOutput = `Error: Command execution failed.\n[Stderr]:\n${error.stderr || error.message}`;
-                console.log(`❌ [Tool Error]: Execution failed.`);
+                console.log(`[Tool Error]: Execution failed.`);
               }
             }
           } else {
             toolOutput = `Error: Unknown tool "${toolName}".`;
-            console.log(`❌ [Tool Error]: Unknown tool requested.`);
+            console.log(`[Tool Error]: Unknown tool requested.`);
           }
         } catch (execError) {
           toolOutput = `Error executing tool: ${execError.message}`;
-          console.log(`❌ [Tool Exception]: ${execError.message}`);
+          console.log(`[Tool Exception]: ${execError.message}`);
         }
 
         hasToolCall = true;
@@ -199,12 +202,16 @@ program
   .action(() => {
     let activeMode = 'think'; // default to thinking mode
 
-    // Display beautiful ASCII Art Logo (Clean, no excessive colored boxes)
+    // Display beautiful ASCII Art Logo (Clean, no emojis)
     console.log(chalk.bold(LOGO));
-    console.log(`🦾 Vought AI — soldier-boy Multi-Mode Loop`);
+    console.log(`Vought AI — Open Source CLI`);
     console.log(`Workspace: ${process.cwd()}`);
-    console.log(`Default Mode: [THINK] (Conversational) | Build Mode: [BUILD] (Tools active)`);
-    console.log(`Slash Commands: /think, /build, /think <prompt>, /build <prompt>, exit\n`);
+    console.log(`\nSlash Commands:`);
+    console.log(`  /think           - Switch to Think Mode`);
+    console.log(`  /build           - Switch to Build Mode`);
+    console.log(`  /cd <path>       - Change active workspace directory`);
+    console.log(`  /pwd             - View active workspace directory`);
+    console.log(`  exit             - Close chat loop\n`);
 
     const rl = readline.createInterface({
       input: process.stdin,
@@ -215,7 +222,6 @@ program
     const chatHistory = [];
 
     const askQuestion = () => {
-      // Prompt display matches Claude-Code style: e.g. "soldier [think] > "
       const modeLabel = activeMode === 'build' ? '[build]' : '[think]';
       rl.question(`soldier ${modeLabel} > `, async (input) => {
         let trimmed = input.trim();
@@ -231,21 +237,51 @@ program
           process.exit(0);
         }
 
-        // Parse slash commands:
+        // 1. Slash Command: /cd
+        if (trimmed.startsWith('/cd')) {
+          const targetPath = trimmed.slice(3).trim();
+          if (!targetPath) {
+            console.log('Error: Please specify a path to change directory.');
+            askQuestion();
+            return;
+          }
+
+          const newPath = path.resolve(process.cwd(), targetPath);
+          if (fs.existsSync(newPath) && fs.statSync(newPath).isDirectory()) {
+            process.chdir(newPath);
+            console.log(`Workspace changed to: ${process.cwd()}`);
+          } else {
+            console.log(`Error: Invalid directory path "${targetPath}"`);
+          }
+          askQuestion();
+          return;
+        }
+
+        // 2. Slash Command: /pwd
+        if (trimmed === '/pwd') {
+          console.log(`Current Workspace: ${process.cwd()}`);
+          askQuestion();
+          return;
+        }
+
+        // 3. Slash Command: /build
         if (trimmed.startsWith('/build')) {
           activeMode = 'build';
           const prompt = trimmed.slice(6).trim();
           if (!prompt) {
-            console.log('⚙️  Switched active mode to [BUILD MODE]. Filesystem tools are active.');
+            console.log('Switched active mode to [BUILD MODE]. Filesystem tools are active.');
             askQuestion();
             return;
           }
           trimmed = prompt;
-        } else if (trimmed.startsWith('/think')) {
+        }
+
+        // 4. Slash Command: /think
+        else if (trimmed.startsWith('/think')) {
           activeMode = 'think';
           const prompt = trimmed.slice(6).trim();
           if (!prompt) {
-            console.log('⚙️  Switched active mode to [THINK MODE]. Conversational mode active.');
+            console.log('Switched active mode to [THINK MODE]. Conversational mode active.');
             askQuestion();
             return;
           }
@@ -255,9 +291,9 @@ program
         // Push clean user prompt to history
         chatHistory.push({ role: 'user', content: trimmed });
 
-        // Update / prepend the correct mode instructions at the start of history to drive mode shifts
+        // Update / prepend the correct mode instructions dynamically using getSystemPrompt
         const cleanHistory = [
-          { role: 'system', content: activeMode === 'build' ? BUILD_SYSTEM_PROMPT : THINK_SYSTEM_PROMPT },
+          { role: 'system', content: getSystemPrompt(activeMode) },
           ...chatHistory
         ];
 
@@ -296,8 +332,8 @@ program
     const fileContent = fs.readFileSync(targetPath, 'utf-8');
     const fileName = path.basename(targetPath);
 
-    console.log(`\n📂 Reading local file context: "${fileName}"...`);
-    console.log(`🤖 Streaming Explanation:\n`);
+    console.log(`\nReading local file context: "${fileName}"...`);
+    console.log(`Streaming Explanation:\n`);
 
     const spinner = ora('Analyzing...').start();
     try {
