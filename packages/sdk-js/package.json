@@ -1,0 +1,10 @@
+{
+  "name": "@soldier-boy/sdk",
+  "version": "1.0.0",
+  "description": "Developer JavaScript SDK for interacting with soldier-boy unified backend",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.7.2"
+  }
+}

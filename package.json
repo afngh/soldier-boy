@@ -1,0 +1,12 @@
+{
+  "name": "soldier-boy-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/cli",
+    "packages/sdk-js"
+  ],
+  "dependencies": {
+    "axios": "^1.16.1"
+  }
+}
