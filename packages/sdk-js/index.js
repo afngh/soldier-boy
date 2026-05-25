@@ -9,7 +9,7 @@ class SoldierBoyAI {
    */
   constructor({ apiKey, baseUrl } = {}) {
     this.apiKey = apiKey || process.env.API_KEY || 'bn_live_4f3c8a9e2d6b1a0f7e5d3c2b1a0f9e8d';
-    this.baseUrl = baseUrl || 'http://localhost:3000';
+    this.baseUrl = baseUrl || process.env.API_BASE_URL || 'http://localhost:3000';
   }
 
   /**
