@@ -18,7 +18,7 @@ const program = new Command();
 const sdk = new SoldierBoyAI();
 
 program
-  .name('soldier-boy')
+  .name('soldier')
   .description('Vought AI\'s Soldier Boy - Autonomous Local Coding Agent')
   .version('1.0.0');
 
@@ -52,6 +52,16 @@ const THINK_SYSTEM_PROMPT = `You are Vought AI's "soldier-boy" running in [THINK
 - Focus purely on conceptual explanations, code architectures, plans, and chat responses.
 - Be concise, professional, and helpful.`;
 
+// Iconic ASCII Art Logo of Soldier Boy (Vought / The Boys style)
+const LOGO = `
+ ███████╗ ██████╗ ██╗     ██████╗ ██╗███████╗██████╗     ██████╗  ██████╗ ██╗   ██╗
+ ██╔════╝██╔═══██╗██║     ██╔══██╗██║██╔════╝██╔══██╗    ██╔══██╗██╔═══██╗╚██╗ ██╔╝
+ ███████╗██║   ██║██║     ██║  ██║██║█████╗  ██████╔╝    ██████╔╝██║   ██║ ╚████╔╝ 
+ ╚════██║██║   ██║██║     ██║  ██║██║██╔══╝  ██╔══██╗    ██╔══██╗██║   ██║  ╚██╔╝  
+ ███████║╚██████╔╝███████╗██████╔╝██║███████╗██║  ██║    ██████╔╝╚██████╔╝   ██║   
+ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   
+`;
+
 /**
  * Helper: Recursive Autonomous Agent Execution Loop
  */
@@ -59,7 +69,7 @@ async function runAutonomousAgentLoop(messages, mode) {
   let hasToolCall = false;
   let toolOutput = null;
 
-  console.log(chalk.bold.cyan(`\n🤖 Assistant (${mode === 'build' ? 'Build Mode' : 'Thinking Mode'}): `));
+  console.log(`\n🤖 Assistant (${mode === 'build' ? 'Build' : 'Think'}):`);
   let responseText = '';
 
   try {
@@ -67,13 +77,13 @@ async function runAutonomousAgentLoop(messages, mode) {
       messages,
       {}, // Standard parameters
       (chunk) => {
-        // Stream delta live to console
-        process.stdout.write(chalk.green(chunk));
+        // Stream plain white text delta live (clean, minimal Claude-Code style)
+        process.stdout.write(chunk);
       }
     );
     console.log(); // Newline
   } catch (err) {
-    console.error(chalk.red(`\n❌ API Error: ${err.message}`));
+    console.error(`\n❌ API Error: ${err.message}`);
     return;
   }
 
@@ -90,74 +100,74 @@ async function runAutonomousAgentLoop(messages, mode) {
       try {
         params = JSON.parse(paramsStr);
       } catch (parseErr) {
-        console.log(chalk.bold.red(`\n⚠️  [Agent Error]: Failed to parse JSON parameters. Make sure to double quote JSON keys.`));
+        console.log(`\n⚠️  [Agent Error]: Failed to parse JSON parameters. Make sure to double quote JSON keys.`);
         toolOutput = `Error: Failed to parse parameters as valid JSON. Retrying tool call using strict double-quoted JSON formats.`;
         hasToolCall = true;
       }
 
       if (!hasToolCall) {
-        console.log(chalk.bold.yellow(`\n⚙️  [Tool Call]: Intercepted local action "${toolName}"...`));
+        console.log(`\n⚙️  [Tool Call]: "${toolName}"...`);
 
         try {
           if (toolName === 'write_file') {
             if (!params.path || params.content === undefined) {
               toolOutput = `Error: Missing 'path' or 'content' in write_file parameters.`;
-              console.log(chalk.red(`❌ [Tool Error]: Missing params.`));
+              console.log(`❌ [Tool Error]: Missing params.`);
             } else {
               const target = path.resolve(process.cwd(), params.path);
               fs.mkdirSync(path.dirname(target), { recursive: true });
               fs.writeFileSync(target, params.content, 'utf-8');
               toolOutput = `Success: File written successfully to ${params.path} (${params.content.length} bytes).`;
-              console.log(chalk.bold.green(`✅ [Tool Success]: Written to "${params.path}".`));
+              console.log(`✅ [Tool Success]: Written to "${params.path}".`);
             }
           } else if (toolName === 'read_file') {
             if (!params.path) {
               toolOutput = `Error: Missing 'path' in read_file parameters.`;
-              console.log(chalk.red(`❌ [Tool Error]: Missing params.`));
+              console.log(`❌ [Tool Error]: Missing params.`);
             } else {
               const target = path.resolve(process.cwd(), params.path);
               if (!fs.existsSync(target)) {
                 toolOutput = `Error: File not found at path "${params.path}".`;
-                console.log(chalk.bold.red(`❌ [Tool Error]: File not found.`));
+                console.log(`❌ [Tool Error]: File not found.`);
               } else {
                 const content = fs.readFileSync(target, 'utf-8');
                 toolOutput = `Success: File content of "${params.path}":\n---\n${content}\n---`;
-                console.log(chalk.bold.green(`✅ [Tool Success]: File content loaded.`));
+                console.log(`✅ [Tool Success]: File content loaded.`);
               }
             }
           } else if (toolName === 'list_dir') {
             const target = path.resolve(process.cwd(), params.path || '.');
             if (!fs.existsSync(target)) {
               toolOutput = `Error: Directory not found at path "${params.path || '.'}".`;
-              console.log(chalk.bold.red(`❌ [Tool Error]: Directory not found.`));
+              console.log(`❌ [Tool Error]: Directory not found.`);
             } else {
               const files = fs.readdirSync(target);
               toolOutput = `Success: Directory listing of "${params.path || '.'}":\n${files.join('\n')}`;
-              console.log(chalk.bold.green(`✅ [Tool Success]: Directory listing completed.`));
+              console.log(`✅ [Tool Success]: Directory listing completed.`);
             }
           } else if (toolName === 'execute_command') {
             if (!params.command) {
               toolOutput = `Error: Missing 'command' in execute_command parameters.`;
-              console.log(chalk.red(`❌ [Tool Error]: Missing command parameter.`));
+              console.log(`❌ [Tool Error]: Missing command parameter.`);
             } else {
-              console.log(chalk.bold.yellow(`\n⚙️  [Local Terminal]: Running command: "${params.command}"`));
+              console.log(`\n⚙️  [Local Terminal]: Running command: "${params.command}"`);
               
               try {
                 const output = execSync(params.command, { encoding: 'utf-8', timeout: 60000 });
                 toolOutput = `Success: Command executed successfully.\n[Stdout/Stderr]:\n${output}`;
-                console.log(chalk.bold.green(`✅ [Tool Success]: Execution completed.`));
+                console.log(`✅ [Tool Success]: Execution completed.`);
               } catch (error) {
                 toolOutput = `Error: Command execution failed.\n[Stderr]:\n${error.stderr || error.message}`;
-                console.log(chalk.bold.red(`❌ [Tool Error]: Execution failed.`));
+                console.log(`❌ [Tool Error]: Execution failed.`);
               }
             }
           } else {
             toolOutput = `Error: Unknown tool "${toolName}".`;
-            console.log(chalk.bold.red(`❌ [Tool Error]: Unknown tool requested.`));
+            console.log(`❌ [Tool Error]: Unknown tool requested.`);
           }
         } catch (execError) {
           toolOutput = `Error executing tool: ${execError.message}`;
-          console.log(chalk.bold.red(`❌ [Tool Exception]: ${execError.message}`));
+          console.log(`❌ [Tool Exception]: ${execError.message}`);
         }
 
         hasToolCall = true;
@@ -180,7 +190,7 @@ async function runAutonomousAgentLoop(messages, mode) {
 }
 
 /**
- * COMMAND: soldier-boy chat
+ * COMMAND: soldier chat
  * Multi-mode recursive chat loop.
  */
 program
@@ -189,19 +199,12 @@ program
   .action(() => {
     let activeMode = 'think'; // default to thinking mode
 
-    console.log(chalk.bold.magenta('\n========================================='));
-    console.log(chalk.bold.magenta(`  🦾 Vought AI — soldier-boy Multi-Mode Loop`));
-    console.log(chalk.dim(`  Workspace: ${process.cwd()}`));
-    console.log(chalk.dim(`  Default Mode: [THINK] (Conversational, tools off)`));
-    console.log(chalk.dim(`  Build Mode:   [BUILD] (Filesystem read/write & exec)`));
-    console.log(chalk.bold.magenta('========================================='));
-    console.log(chalk.bold.yellow('  💡 Slash Commands:'));
-    console.log(chalk.dim('     /think <prompt>  - Switch to Think Mode and send prompt'));
-    console.log(chalk.dim('     /build <prompt>  - Switch to Build Mode and execute tools'));
-    console.log(chalk.dim('     /think           - Switch active mode to Think'));
-    console.log(chalk.dim('     /build           - Switch active mode to Build'));
-    console.log(chalk.dim('     exit / quit      - Terminate chat loop'));
-    console.log(chalk.bold.magenta('=========================================\n'));
+    // Display beautiful ASCII Art Logo (Clean, no excessive colored boxes)
+    console.log(chalk.bold(LOGO));
+    console.log(`🦾 Vought AI — soldier-boy Multi-Mode Loop`);
+    console.log(`Workspace: ${process.cwd()}`);
+    console.log(`Default Mode: [THINK] (Conversational) | Build Mode: [BUILD] (Tools active)`);
+    console.log(`Slash Commands: /think, /build, /think <prompt>, /build <prompt>, exit\n`);
 
     const rl = readline.createInterface({
       input: process.stdin,
@@ -212,9 +215,9 @@ program
     const chatHistory = [];
 
     const askQuestion = () => {
-      // Prompt display shows active mode: e.g. "soldier-boy [think] > "
-      const modeLabel = activeMode === 'build' ? chalk.bold.red('[build]') : chalk.bold.green('[think]');
-      rl.question(`${chalk.cyan('soldier-boy')} ${modeLabel} ${chalk.cyan('> ')}`, async (input) => {
+      // Prompt display matches Claude-Code style: e.g. "soldier [think] > "
+      const modeLabel = activeMode === 'build' ? '[build]' : '[think]';
+      rl.question(`soldier ${modeLabel} > `, async (input) => {
         let trimmed = input.trim();
         if (!trimmed) {
           askQuestion();
@@ -223,7 +226,7 @@ program
 
         const lowerVal = trimmed.toLowerCase();
         if (lowerVal === 'exit' || lowerVal === 'quit') {
-          console.log(chalk.dim('\nSession closed. Goodbye! 👋'));
+          console.log('\nSession closed. Goodbye! 👋');
           rl.close();
           process.exit(0);
         }
@@ -233,7 +236,7 @@ program
           activeMode = 'build';
           const prompt = trimmed.slice(6).trim();
           if (!prompt) {
-            console.log(chalk.bold.red('⚙️  Switched active mode to [BUILD MODE]. Filesystem tools are now active.'));
+            console.log('⚙️  Switched active mode to [BUILD MODE]. Filesystem tools are active.');
             askQuestion();
             return;
           }
@@ -242,7 +245,7 @@ program
           activeMode = 'think';
           const prompt = trimmed.slice(6).trim();
           if (!prompt) {
-            console.log(chalk.bold.green('⚙️  Switched active mode to [THINK MODE]. Pure conversational mode active.'));
+            console.log('⚙️  Switched active mode to [THINK MODE]. Conversational mode active.');
             askQuestion();
             return;
           }
@@ -275,7 +278,7 @@ program
   });
 
 /**
- * COMMAND: soldier-boy explain <file>
+ * COMMAND: soldier explain <file>
  * Direct single-file context analyzer
  */
 program
@@ -286,17 +289,17 @@ program
     const targetPath = path.resolve(process.cwd(), file);
     
     if (!fs.existsSync(targetPath)) {
-      console.error(chalk.red(`❌ Error: Local file does not exist at path "${file}"`));
+      console.error(`❌ Error: Local file does not exist at path "${file}"`);
       process.exit(1);
     }
 
     const fileContent = fs.readFileSync(targetPath, 'utf-8');
     const fileName = path.basename(targetPath);
 
-    console.log(chalk.bold.yellow(`\n📂 Reading local file context: "${fileName}"...`));
-    console.log(chalk.bold.cyan('🤖 Streaming Explanation:\n'));
+    console.log(`\n📂 Reading local file context: "${fileName}"...`);
+    console.log(`🤖 Streaming Explanation:\n`);
 
-    const spinner = ora(chalk.dim('Analyzing...')).start();
+    const spinner = ora('Analyzing...').start();
     try {
       spinner.stop();
       await sdk.stream(
@@ -309,12 +312,12 @@ program
         ],
         {},
         (chunk) => {
-          process.stdout.write(chalk.green(chunk));
+          process.stdout.write(chunk);
         }
       );
       console.log('\n');
     } catch (err) {
-      spinner.fail(chalk.red(`Failed: ${err.message}`));
+      spinner.fail(`Failed: ${err.message}`);
     }
   });
 
