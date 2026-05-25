@@ -2,7 +2,7 @@ import axios from 'axios';
 import { SoldierBoyAI } from './packages/sdk-js/index.js';
 
 const BASE_URL = 'http://localhost:3000';
-const VALID_KEY = 'black-noir-secret-key';
+const VALID_KEY = 'bn_live_4f3c8a9e2d6b1a0f7e5d3c2b1a0f9e8d';
 
 async function runStreamingTests() {
   console.log('🧪 Starting Phase 3 Developer Infrastructure Verification Tests...\n');
