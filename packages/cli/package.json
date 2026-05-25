@@ -4,7 +4,8 @@
   "description": "Local Terminal Coding Agent CLI linking to internal file system",
   "type": "module",
   "bin": {
-    "soldier-boy": "./bin/cli.js"
+    "soldier-boy": "./bin/cli.js",
+    "soldier": "./bin/cli.js"
   },
   "dependencies": {
     "commander": "^12.1.0",
