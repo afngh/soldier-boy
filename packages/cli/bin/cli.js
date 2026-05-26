@@ -295,19 +295,14 @@ function getSystemPrompt(mode) {
 }
 
 // Iconic ASCII Art Logo of Soldier Boy (Vought / The Boys style)
-const LOGO = `
-  ${chalk.green('▛▜▜▜▜')}
-  ${chalk.green('▙▟▟▟▟')}
-  ${chalk.green('║')}           ${chalk.yellow('▄▄██████▄▄')}
-  ${chalk.green('║')}         ${chalk.green('▄██████')}  ${chalk.yellow('▀▀')}  ${chalk.green('██████▄')}
-  ${chalk.green('║')}        ${chalk.green('███████')}   ${chalk.yellow('▄▄')}   ${chalk.green('███████')}
-          ${chalk.green('██████')}   ${chalk.yellow('▐████▌')}   ${chalk.green('██████')}
-          ${chalk.green('██████')}    ${chalk.yellow('▀██▀')}    ${chalk.green('██████')}
-          ${chalk.green('▀██████▄')}   ${chalk.yellow('██')}   ${chalk.green('▄██████▀')}
-            ${chalk.green('▀██████▄')} ${chalk.yellow('██')} ${chalk.green('▄██████▀')}
-              ${chalk.green('▀█████')} ${chalk.yellow('██')} ${chalk.green('█████▀')}
-                ${chalk.green('▀▀▀▀')}  ${chalk.yellow('★')}  ${chalk.green('▀▀▀▀')}
-`;
+const LOGO = chalk.bold.green(`
+ ███████╗ ██████╗ ██╗     ██████╗ ██╗███████╗██████╗     ██████╗  ██████╗ ██╗   ██╗
+ ██╔════╝██╔═══██╗██║     ██╔══██╗██║██╔════╝██╔══██╗    ██╔══██╗██╔═══██╗╚██╗ ██╔╝
+ ███████╗██║   ██║██║     ██║  ██║██║█████╗  ██████╔╝    ██████╔╝██║   ██║ ╚████╔╝ 
+ ╚════██║██║   ██║██║     ██║  ██║██║██╔══╝  ██╔══██╗    ██╔══██╗██║   ██║  ╚██╔╝  
+ ███████║╚██████╔╝███████╗██████╔╝██║███████╗██║  ██║    ██████╔╝╚██████╔╝   ██║   
+ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   
+`);
 
 /**
  * Helper: Recursive Autonomous Agent Execution Loop
