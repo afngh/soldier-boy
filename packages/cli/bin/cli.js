@@ -502,7 +502,7 @@ program
 
     const askQuestion = () => {
       const modeLabel = activeMode === 'build' ? '[build]' : '[think]';
-      rl.question(`soldier ${modeLabel} > `, async (input) => {
+      rl.question(`\nsoldier ${modeLabel} > `, async (input) => {
         let trimmed = input.trim();
         if (!trimmed) {
           askQuestion();
