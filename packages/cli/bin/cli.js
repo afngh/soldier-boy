@@ -83,6 +83,8 @@ You DO NOT write complete source code or complex content.
    Format: {{call:list_dir, {"path": "py-test"} }}
 
 ### Operating Guidelines:
+- Strictly create ONLY the files and folders explicitly requested in the instruction.
+- DO NOT create any extra unrequested files or directories (such as docs, src, tests, config, LICENSE, README, .gitignore) unless specifically requested.
 - If you call a tool, you MUST end your response immediately after the }} tag. Do not output anything else.
 - Be precise, corporate, and formal. Use double quotes for all JSON keys and values inside the {{call:...}} parameters.`;
   }
